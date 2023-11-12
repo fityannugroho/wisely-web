@@ -7,18 +7,30 @@ import tailwind from "@astrojs/tailwind";
 export default defineConfig({
   integrations: [
     starlight({
-      title: 'My Docs',
+      title: 'Wisely',
+      defaultLocale: 'root',
+      locales: {
+        root: {
+          label: 'English',
+          lang: 'en',
+        },
+        id: {
+          label: 'Bahasa Indonesia',
+          lang: 'id',
+        },
+      },
       social: {
-        github: 'https://github.com/withastro/starlight'
+        github: 'https://github.com/fityannugroho/wisely-web',
       },
       sidebar: [{
         label: 'Guides',
         items: [
-        // Each item here is one entry in the navigation menu.
-        {
-          label: 'Example Guide',
-          link: '/guides/example/'
-        }]
+          // Each item here is one entry in the navigation menu.
+          {
+            label: 'Example Guide',
+            link: '/guides/example/'
+          }
+        ],
       }, {
         label: 'Reference',
         autogenerate: {
@@ -27,7 +39,7 @@ export default defineConfig({
       }],
       customCss: [
         './src/styles/tailwind.css',
-      ]
+      ],
     }),
     tailwind({
       applyBaseStyles: false,
