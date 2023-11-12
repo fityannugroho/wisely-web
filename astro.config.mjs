@@ -22,21 +22,19 @@ export default defineConfig({
       social: {
         github: 'https://github.com/fityannugroho/wisely-web',
       },
-      sidebar: [{
-        label: 'Guides',
-        items: [
-          // Each item here is one entry in the navigation menu.
-          {
-            label: 'Example Guide',
-            link: '/guides/example/'
-          }
-        ],
-      }, {
-        label: 'Reference',
-        autogenerate: {
-          directory: 'reference'
+      sidebar: [
+        {
+          label: 'Guides',
+          autogenerate: {directory: 'guides'},
+          translations: {
+            id: 'Panduan',
+          },
+        },
+        {
+          label: 'Manual',
+          autogenerate: {directory: 'manual'},
         }
-      }],
+      ],
       customCss: [
         './src/styles/tailwind.css',
       ],
