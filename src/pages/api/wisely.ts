@@ -11,22 +11,19 @@ export const GET: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({
       status: 400,
       error: 'Bad Request',
-      message: 'No query string provided'
+      message: 'No query string provided',
     }), {
       status: 400,
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json; charset=utf-8'},
     });
   }
-
-  const res = wisely({ text });
-  console.log(text, res);
 
   return new Response(JSON.stringify({
     status: 200,
     message: 'OK',
-    text: res
+    text: wisely({ text }),
   }), {
     status: 200,
-    headers: {'Content-Type': 'application/json'},
+    headers: {'Content-Type': 'application/json; charset=utf-8'},
   });
 }
