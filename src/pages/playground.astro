@@ -1,7 +1,11 @@
 ---
-import ButtonCount from '../components/ButtonCount.tsx';
+import Layout from '../layouts/Layout.astro';
+import PlaygroundEl from '../components/Playground.tsx';
 ---
 
-<h1>Playground</h1>
+<Layout title='Playground | Wisely'>
+  <h1 class="text-2xl mb-4 text-center">Wisely Playground</h1>
 
-<ButtonCount client:load />
+  <PlaygroundEl client:load />
+
+</Layout>
