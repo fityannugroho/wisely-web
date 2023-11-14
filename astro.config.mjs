@@ -1,3 +1,4 @@
+import node from '@astrojs/node';
 import react from "@astrojs/react";
 import starlight from '@astrojs/starlight';
 import tailwind from "@astrojs/tailwind";
@@ -39,4 +40,8 @@ export default defineConfig({
     react(),
     tailwind(),
   ],
+  output: 'hybrid',
+  adapter: node({
+    mode: 'standalone',
+  }),
 });
