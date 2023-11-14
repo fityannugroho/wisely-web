@@ -1,7 +1,7 @@
-import node from '@astrojs/node';
 import react from "@astrojs/react";
 import starlight from '@astrojs/starlight';
 import tailwind from "@astrojs/tailwind";
+import vercel from "@astrojs/vercel/serverless";
 import { defineConfig } from 'astro/config';
 
 // https://astro.build/config
@@ -41,7 +41,5 @@ export default defineConfig({
     tailwind(),
   ],
   output: 'hybrid',
-  adapter: node({
-    mode: 'standalone',
-  }),
+  adapter: vercel(),
 });
