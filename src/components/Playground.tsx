@@ -9,7 +9,9 @@ export default function Playground() {
 
   useEffect(() => {
     if (fetching) {
-      fetch(`/api/wisely?q=${input}`)
+      fetch(`/api/wisely?q=${input}`, {
+        mode: 'cors'
+      })
         .then(res => res.json())
         .then(data => {
           setResult(data.text);
