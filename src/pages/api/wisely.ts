@@ -18,10 +18,13 @@ export const GET: APIRoute = async ({ request }) => {
     });
   }
 
+  const res = wisely({ text });
+  console.log(text, res);
+
   return new Response(JSON.stringify({
     status: 200,
     message: 'OK',
-    text: wisely({ text })
+    text: res
   }), {
     status: 200,
     headers: {'Content-Type': 'application/json'},
