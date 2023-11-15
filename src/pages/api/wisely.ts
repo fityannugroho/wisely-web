@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import wisely from 'wisely';
 
-// export const prerender = false;
+export const prerender = false;
 
 export const GET: APIRoute = async ({ request }) => {
   const { searchParams } = new URL(request.url);
