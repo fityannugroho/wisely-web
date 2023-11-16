@@ -1,27 +1,45 @@
-import { defineConfig } from 'astro/config';
+import react from "@astrojs/react";
 import starlight from '@astrojs/starlight';
+import tailwind from "@astrojs/tailwind";
+import vercel from "@astrojs/vercel/serverless";
+import { defineConfig } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-	integrations: [
-		starlight({
-			title: 'My Docs',
-			social: {
-				github: 'https://github.com/withastro/starlight',
-			},
-			sidebar: [
-				{
-					label: 'Guides',
-					items: [
-						// Each item here is one entry in the navigation menu.
-						{ label: 'Example Guide', link: '/guides/example/' },
-					],
-				},
-				{
-					label: 'Reference',
-					autogenerate: { directory: 'reference' },
-				},
-			],
-		}),
-	],
+  integrations: [
+    starlight({
+      title: 'Wisely',
+      defaultLocale: 'root',
+      locales: {
+        root: {
+          label: 'English',
+          lang: 'en',
+        },
+        id: {
+          label: 'Bahasa Indonesia',
+          lang: 'id',
+        },
+      },
+      social: {
+        github: 'https://github.com/fityannugroho/wisely-web',
+      },
+      sidebar: [
+        {
+          label: 'Guides',
+          autogenerate: {directory: 'guides'},
+          translations: {
+            id: 'Panduan',
+          },
+        },
+        {
+          label: 'Manual',
+          autogenerate: {directory: 'manual'},
+        }
+      ],
+    }),
+    react(),
+    tailwind(),
+  ],
+  output: 'hybrid',
+  adapter: vercel(),
 });
