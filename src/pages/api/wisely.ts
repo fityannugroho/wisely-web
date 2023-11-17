@@ -23,7 +23,7 @@ export const GET: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({
       status: 400,
       error: 'Bad Request',
-      message: 'No query string provided',
+      message: 'No text provided',
     }), {
       status: 400,
       headers: {'Content-Type': 'application/json; charset=utf-8'},
