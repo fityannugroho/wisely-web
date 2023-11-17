@@ -13,9 +13,18 @@ type TextAreaProps = {
    * @default 4
    */
   rows?: number,
+  helpText?: string | React.ReactNode,
 };
 
-export default function TextArea({ id, label, onInputChange, error, placeholder, rows}: TextAreaProps) {
+export default function TextArea({
+  id,
+  label,
+  onInputChange,
+  error,
+  helpText,
+  placeholder,
+  rows
+}: TextAreaProps) {
   const [textValue, setTextValue] = useState('');
 
   const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -32,7 +41,7 @@ export default function TextArea({ id, label, onInputChange, error, placeholder,
       <textarea
         id={id}
         className={`
-          // form-textarea w-full py-2 px-3 mt-1 block rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50
+          // form-textarea w-full py-2 px-3 mt-2 block rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50
           ${error ? 'border-red-500' : ''}
         `}
         rows={rows ?? 4}
@@ -40,7 +49,11 @@ export default function TextArea({ id, label, onInputChange, error, placeholder,
         value={textValue}
         onChange={handleInputChange}
       ></textarea>
-      {error && <p className="text-red-500 font-semibold">{error}</p>}
+      {error ? (
+        <p className="text-red-500 text-sm mt-1 ml-1">{error}</p>
+      ) : (
+        helpText && (<p className="text-gray-500 mt-1 ml-1 text-sm">{helpText}</p>)
+      )}
     </div>
   );
 };

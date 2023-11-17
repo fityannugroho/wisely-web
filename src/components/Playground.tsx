@@ -75,6 +75,16 @@ export default function Playground(props: PlaygroundProps) {
         placeholder='Lorem ipsun dolor sit amet'
         onInputChange={(val) => setInput(val)}
         error={error}
+        helpText={
+          <p>
+            Can be plain text or <a
+              href="https://www.markdownguide.org/basic-syntax/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-500 underline"
+            >Markdown syntax</a>.
+          </p>
+        }
       />
 
       <details>
