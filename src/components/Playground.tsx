@@ -33,6 +33,8 @@ export default function Playground(props: PlaygroundProps) {
 
   useEffect(() => {
     if (fetching) {
+      setError(undefined);
+
       const url = new URL('/api/wisely', window.location.origin);
 
       url.searchParams.set('q', input);
@@ -54,11 +56,6 @@ export default function Playground(props: PlaygroundProps) {
         .finally(() => {
           setFetching(false);
         });
-    }
-
-    return () => {
-      setFetching(false);
-      setError(undefined);
     }
   }, [fetching]);
 
