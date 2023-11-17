@@ -77,40 +77,47 @@ export default function Playground(props: PlaygroundProps) {
         error={error}
       />
 
-      <p className="text-gray-700 mt-3 mb-2">Case</p>
-      <CheckBox
-        label='case-sensitive'
-        onChange={(checked) => setCaseSensitive(checked)}
-      />
-
-      <p className="text-gray-700 mt-3 mb-2">Charsets</p>
-      <div className="block">
-        <div className="inline-flex flex-col space-y-2 mb-4">
-          {charsetNames.map((name) => (
+      <details>
+        <summary className='mb-2'>Settings</summary>
+        <div className='pb-4 flex flex-row flex-wrap gap-x-12 gap-y-4'>
+          <div className="block">
+            <p className="text-gray-700 mb-2">Case</p>
             <CheckBox
-              key={name}
-              label={`${name}${name === 'latin' ? ' (default)' : ''}`}
-              onChange={(checked) => {
-                dispatchCharsets({ type: checked ? 'add' : 'remove', charset: name });
-              }}
-              checked={charsets.includes(name)}
-              disabled={name === 'latin' && charsets.length === 1 && charsets[0] === 'latin'}
+              label='case-sensitive'
+              onChange={(checked) => setCaseSensitive(checked)}
             />
-          ))}
+          </div>
+
+          <div className="block">
+            <p className="text-gray-700 mb-2">Charsets</p>
+            <div className="inline-flex flex-col space-y-2">
+              {charsetNames.map((name) => (
+                <CheckBox
+                  key={name}
+                  label={`${name}${name === 'latin' ? ' (default)' : ''}`}
+                  onChange={(checked) => {
+                    dispatchCharsets({ type: checked ? 'add' : 'remove', charset: name });
+                  }}
+                  checked={charsets.includes(name)}
+                  disabled={name === 'latin' && charsets.length === 1 && charsets[0] === 'latin'}
+                />
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      </details>
 
       <Button
         id="btnSubmit"
         label={fetching ? 'Fetching...' : 'Start'}
         onClick={() => setFetching(!fetching)}
         disabled={fetching}
-        className='mt-2 mb-4'
+        className='mt-3 w-full md:w-auto'
       />
 
       {/* Render result */}
       {result.length > 0 && (
-        <>
+        <div className='mt-6'>
           {/* Markdown mode toggle */}
           <div className="flex justify-end mb-2">
             <CheckBox
@@ -121,7 +128,7 @@ export default function Playground(props: PlaygroundProps) {
           <div className="block border border-gray-300 rounded-md p-4">
             <MarkdownViewer text={result} raw={!mdMode} />
           </div>
-        </>
+        </div>
       )}
     </div>
   )
