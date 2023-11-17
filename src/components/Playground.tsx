@@ -1,6 +1,7 @@
 import { useEffect, useReducer, useState } from 'react';
 import Button from './Button';
 import CheckBox from './CheckBox';
+import MarkdownViewer from './MarkdownViewer';
 import TextArea from './TextArea';
 
 function charsetsReducer(
@@ -28,8 +29,9 @@ export default function Playground(props: PlaygroundProps) {
   const [charsets, dispatchCharsets] = useReducer(charsetsReducer, ['latin']);
   const [caseSensitive, setCaseSensitive] = useState<boolean>(false);
   const [fetching, setFetching] = useState<boolean>(false);
-  const [result, setResult] = useState('The result will be here...');
+  const [result, setResult] = useState('');
   const [error, setError] = useState<string | undefined>(undefined);
+  const [mdMode, setMdMode] = useState<boolean>(false);
 
   useEffect(() => {
     if (fetching) {
@@ -103,16 +105,24 @@ export default function Playground(props: PlaygroundProps) {
         label={fetching ? 'Fetching...' : 'Start'}
         onClick={() => setFetching(!fetching)}
         disabled={fetching}
+        className='mt-2 mb-4'
       />
 
-      <hr className="my-4" />
-
-      <p
-        id="result"
-        className="text-mono"
-      >
-        {result || error}
-      </p>
+      {/* Render result */}
+      {result.length > 0 && (
+        <>
+          {/* Markdown mode toggle */}
+          <div className="flex justify-end mb-2">
+            <CheckBox
+              label='Render as markdown'
+              onChange={(checked) => setMdMode(checked)}
+            />
+          </div>
+          <div className="block border border-gray-300 rounded-md p-4">
+            <MarkdownViewer text={result} raw={!mdMode} />
+          </div>
+        </>
+      )}
     </div>
   )
 }
