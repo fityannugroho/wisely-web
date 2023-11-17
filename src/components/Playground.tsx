@@ -1,6 +1,7 @@
 import { useEffect, useReducer, useState } from 'react';
 import Button from './Button';
 import CheckBox from './CheckBox';
+import MarkdownViewer from './MarkdownViewer';
 import TextArea from './TextArea';
 
 function charsetsReducer(
@@ -28,8 +29,9 @@ export default function Playground(props: PlaygroundProps) {
   const [charsets, dispatchCharsets] = useReducer(charsetsReducer, ['latin']);
   const [caseSensitive, setCaseSensitive] = useState<boolean>(false);
   const [fetching, setFetching] = useState<boolean>(false);
-  const [result, setResult] = useState('The result will be here...');
+  const [result, setResult] = useState('');
   const [error, setError] = useState<string | undefined>(undefined);
+  const [mdMode, setMdMode] = useState<boolean>(false);
 
   useEffect(() => {
     if (fetching) {
@@ -73,46 +75,71 @@ export default function Playground(props: PlaygroundProps) {
         placeholder='Lorem ipsun dolor sit amet'
         onInputChange={(val) => setInput(val)}
         error={error}
+        helpText={
+          <p>
+            Can be plain text or <a
+              href="https://www.markdownguide.org/basic-syntax/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-500 underline"
+            >Markdown syntax</a>.
+          </p>
+        }
       />
 
-      <p className="text-gray-700 mt-3 mb-2">Case</p>
-      <CheckBox
-        label='case-sensitive'
-        onChange={(checked) => setCaseSensitive(checked)}
-      />
-
-      <p className="text-gray-700 mt-3 mb-2">Charsets</p>
-      <div className="block">
-        <div className="inline-flex flex-col space-y-2 mb-4">
-          {charsetNames.map((name) => (
+      <details>
+        <summary className='mb-2'>Settings</summary>
+        <div className='pb-4 flex flex-row flex-wrap gap-x-12 gap-y-4'>
+          <div className="block">
+            <p className="text-gray-700 mb-2">Case</p>
             <CheckBox
-              key={name}
-              label={`${name}${name === 'latin' ? ' (default)' : ''}`}
-              onChange={(checked) => {
-                dispatchCharsets({ type: checked ? 'add' : 'remove', charset: name });
-              }}
-              checked={charsets.includes(name)}
-              disabled={name === 'latin' && charsets.length === 1 && charsets[0] === 'latin'}
+              label='case-sensitive'
+              onChange={(checked) => setCaseSensitive(checked)}
             />
-          ))}
+          </div>
+
+          <div className="block">
+            <p className="text-gray-700 mb-2">Charsets</p>
+            <div className="inline-flex flex-col space-y-2">
+              {charsetNames.map((name) => (
+                <CheckBox
+                  key={name}
+                  label={`${name}${name === 'latin' ? ' (default)' : ''}`}
+                  onChange={(checked) => {
+                    dispatchCharsets({ type: checked ? 'add' : 'remove', charset: name });
+                  }}
+                  checked={charsets.includes(name)}
+                  disabled={name === 'latin' && charsets.length === 1 && charsets[0] === 'latin'}
+                />
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      </details>
 
       <Button
         id="btnSubmit"
         label={fetching ? 'Fetching...' : 'Start'}
         onClick={() => setFetching(!fetching)}
         disabled={fetching}
+        className='mt-3 w-full md:w-auto'
       />
 
-      <hr className="my-4" />
-
-      <p
-        id="result"
-        className="text-mono"
-      >
-        {result || error}
-      </p>
+      {/* Render result */}
+      {result.length > 0 && (
+        <div className='mt-6'>
+          {/* Markdown mode toggle */}
+          <div className="flex justify-end mb-2">
+            <CheckBox
+              label='Render as Markdown'
+              onChange={(checked) => setMdMode(checked)}
+            />
+          </div>
+          <div className="block border border-gray-300 rounded-md p-4">
+            <MarkdownViewer text={result} raw={!mdMode} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
