@@ -131,7 +131,7 @@ export default function Playground(props: PlaygroundProps) {
           {/* Markdown mode toggle */}
           <div className="flex justify-end mb-2">
             <CheckBox
-              label='Render as markdown'
+              label='Render as Markdown'
               onChange={(checked) => setMdMode(checked)}
             />
           </div>
