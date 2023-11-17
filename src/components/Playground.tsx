@@ -17,9 +17,13 @@ function charsetsReducer(
   }
 }
 
+export type PlaygroundProps = {
+  className?: string;
+}
+
 const charsetNames = ['latin', 'latin-1'] as const;
 
-export default function Playground() {
+export default function Playground(props: PlaygroundProps) {
   const [input, setInput] = useState<string>('');
   const [charsets, dispatchCharsets] = useReducer(charsetsReducer, ['latin']);
   const [caseSensitive, setCaseSensitive] = useState<boolean>(false);
@@ -65,7 +69,7 @@ export default function Playground() {
   }, [charsets]);
 
   return (
-    <>
+    <div className={props.className}>
       <TextArea
         id="textInput"
         label='Enter the text'
@@ -112,6 +116,6 @@ export default function Playground() {
       >
         {result || error}
       </p>
-    </>
+    </div>
   )
 }
