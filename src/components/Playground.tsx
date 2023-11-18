@@ -70,11 +70,14 @@ export default function Playground(props: PlaygroundProps) {
   return (
     <div className={props.className}>
       <TextArea
-        id="textInput"
+        className='mb-4'
+        fullWidth
         label='Enter the text'
-        placeholder='Lorem ipsun dolor sit amet'
-        onInputChange={(val) => setInput(val)}
+        placeholder='You can put plain text or Markdown syntax here'
+        onChange={(val) => setInput(val)}
+        value={input}
         error={error}
+        rows={4}
         helpText={
           <p>
             Can be plain text or <a
