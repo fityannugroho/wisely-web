@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useState } from 'react';
-import { CharSets } from 'wisely/core';
+import { CharSets, isCharSetValid } from 'wisely/core';
 import Button from './Button';
 import CheckBox from './CheckBox';
 import Input from './Input';
@@ -27,6 +27,7 @@ export type PlaygroundProps = {
 export default function Playground(props: PlaygroundProps) {
   const [input, setInput] = useState<string>('');
   const [charsets, dispatchCharsets] = useReducer(charsetsReducer, ['latin']);
+  const [customCharset, setCustomCharset] = useState<string>('');
   const [caseSensitive, setCaseSensitive] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState('');
@@ -41,10 +42,20 @@ export default function Playground(props: PlaygroundProps) {
       const url = new URL('/api/wisely', window.location.origin);
 
       url.searchParams.set('t', input);
-      url.searchParams.set('p', phrases.join(','))
+      url.searchParams.set('p', phrases.join(','));
+
       charsets.forEach(charset => {
+        if (charset === 'custom') {
+          // remove all whitespaces
+          const custom = customCharset.replace(/\s/g, '');
+          if (custom) {
+            url.searchParams.append('custom', custom);
+          }
+          return;
+        }
         url.searchParams.append('charset', charset);
       });
+
       if (caseSensitive) {
         url.searchParams.set('sensitive', '');
       }
@@ -107,7 +118,7 @@ export default function Playground(props: PlaygroundProps) {
 
       <details>
         <summary className='mb-2'>Settings</summary>
-        <div className='pb-4 flex flex-row flex-wrap gap-x-12 gap-y-4'>
+        <div className='pb-2 flex flex-row flex-wrap gap-x-12 gap-y-4'>
           <div className="block">
             <p className="text-gray-700 mb-2">Case</p>
             <CheckBox
@@ -130,9 +141,58 @@ export default function Playground(props: PlaygroundProps) {
                   disabled={name === 'latin' && charsets.length === 1 && charsets[0] === 'latin'}
                 />
               ))}
+              <CheckBox
+                label='custom'
+                onChange={(checked) => {
+                  dispatchCharsets({ type: checked ? 'add' : 'remove', charset: 'custom' });
+                  // reset custom charset
+                  if (!checked) {
+                    setCustomCharset('');
+                  }
+                }}
+              />
             </div>
           </div>
         </div>
+
+        {/* Custom charset */}
+        {charsets.includes('custom') && (
+          <TextArea
+            className='mt-2 mb-4'
+            fullWidth
+            fontVariant='mono'
+            label='Custom charset'
+            helpText={
+              <p>
+                Enter custom charset in <b>JSON</b> format. It also must be a <a
+                  href="https://github.com/fityannugroho/wisely#charsets"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-500 underline"
+                >valid charset</a>.
+              </p>
+            }
+            placeholder='e.g. { "a": ["4","@"], "e": ["3"], "i": ["1"] }'
+            onChange={(val) => setCustomCharset(val)}
+            value={customCharset}
+            rows={4}
+            error={(() => {
+              if (customCharset) {
+                try {
+                  if (!isCharSetValid(JSON.parse(customCharset))) {
+                    return 'Invalid charset provided';
+                  }
+                } catch (err) {
+                  return 'Invalid JSON format';
+                }
+              }
+              if (charsets.length === 1 && charsets[0] === 'custom' && !customCharset) {
+                return 'Custom charset must be provided';
+              }
+              return undefined;
+            })()}
+          />
+        )}
       </details>
 
       <Button

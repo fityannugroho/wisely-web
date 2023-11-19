@@ -4,6 +4,12 @@ type TextAreaProps = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'onChange
   label: string;
   error?: string;
   fullWidth?: boolean;
+  /**
+   * Font variant for `<textarea>` element.
+   *
+   * @default 'sans'
+   */
+  fontVariant?: 'mono' | 'sans' | 'serif';
   helpText?: string | React.ReactNode;
   /**
    * Id for `<textarea>` element.
@@ -17,6 +23,7 @@ type TextAreaProps = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'onChange
 export default function TextArea({
   error,
   fullWidth,
+  fontVariant = 'sans',
   helpText,
   label,
   ...props
@@ -37,6 +44,7 @@ export default function TextArea({
           form-textarea py-2 px-3 mt-2 block rounded-md border-gray-300 shadow-sm
           focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50
           placeholder-gray-400
+          font-${fontVariant}
           ${fullWidth ? 'w-full' : ''}
           ${error ? 'border-red-500' : ''}
         `}

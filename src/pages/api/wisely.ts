@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import wisely, { CharSets, isPhraseValid, type CharSet } from 'wisely/core';
+import wisely, { CharSets, isPhraseValid, type CharSet, isCharSetValid } from 'wisely/core';
 
 export const prerender = false;
 
@@ -50,6 +50,7 @@ export const GET: APIRoute = async ({ request }) => {
     searchParams.get('p')?.split(',')
       .filter(isPhraseValid).map((phrase) => phrase.trim())
   ));
+  const strCustomCharSet = searchParams.get('custom');
 
   if (!text?.length) {
     return new BadRequestResponse('No text provided');
@@ -60,7 +61,21 @@ export const GET: APIRoute = async ({ request }) => {
     return new BadRequestResponse('Invalid charset');
   }
 
-  if (!charSetNames.length) {
+  // Validate the custom charSet
+  let customCharSet: CharSet | undefined;
+  try {
+    if (strCustomCharSet) {
+      customCharSet = JSON.parse(strCustomCharSet) as CharSet;
+
+      if (!isCharSetValid(customCharSet)) {
+        throw new Error();
+      }
+    }
+  } catch (error) {
+    return new BadRequestResponse('Invalid custom charset');
+  }
+
+  if (!charSetNames.length && !customCharSet) {
     charSetNames.push('latin');
   }
 
@@ -79,6 +94,10 @@ export const GET: APIRoute = async ({ request }) => {
       });
     }),
   );
+
+  if (customCharSet) {
+    charSets.push(customCharSet);
+  }
 
   return new Response(JSON.stringify({
     status: 200,
