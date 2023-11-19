@@ -1,6 +1,8 @@
 import { useEffect, useReducer, useState } from 'react';
+import { CharSets } from 'wisely/core';
 import Button from './Button';
 import CheckBox from './CheckBox';
+import Input from './Input';
 import MarkdownViewer from './MarkdownViewer';
 import TextArea from './TextArea';
 
@@ -22,29 +24,29 @@ export type PlaygroundProps = {
   className?: string;
 }
 
-const charsetNames = ['latin', 'latin-1'] as const;
-
 export default function Playground(props: PlaygroundProps) {
   const [input, setInput] = useState<string>('');
   const [charsets, dispatchCharsets] = useReducer(charsetsReducer, ['latin']);
   const [caseSensitive, setCaseSensitive] = useState<boolean>(false);
-  const [fetching, setFetching] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState('');
   const [error, setError] = useState<string | undefined>(undefined);
   const [mdMode, setMdMode] = useState<boolean>(false);
+  const [phrases, setPhrases] = useState<string[]>([]);
 
   useEffect(() => {
-    if (fetching) {
+    if (loading) {
       setError(undefined);
 
       const url = new URL('/api/wisely', window.location.origin);
 
-      url.searchParams.set('q', input);
+      url.searchParams.set('t', input);
+      url.searchParams.set('p', phrases.join(','))
       charsets.forEach(charset => {
-        url.searchParams.append('charSet', charset);
+        url.searchParams.append('charset', charset);
       });
       if (caseSensitive) {
-        url.searchParams.set('caseSensitive', '');
+        url.searchParams.set('sensitive', '');
       }
 
       fetch(url, { mode: 'cors' })
@@ -56,10 +58,10 @@ export default function Playground(props: PlaygroundProps) {
           console.error(err);
         })
         .finally(() => {
-          setFetching(false);
+          setLoading(false);
         });
     }
-  }, [fetching]);
+  }, [loading]);
 
   useEffect(() => {
     if (charsets.length === 0) {
@@ -90,6 +92,19 @@ export default function Playground(props: PlaygroundProps) {
         }
       />
 
+      <Input
+        className='mb-4'
+        fullWidth
+        label='Phrases (optional)'
+        helpText='Enter specific phrases to obsfucate, separated by comma.'
+        placeholder='e.g. lorem, ipsum, dolor sit, amet'
+        onChange={(val) => setPhrases(
+          Array.from(new Set(
+            val.split(',').map(phrase => phrase.trim())
+          ))
+        )}
+      />
+
       <details>
         <summary className='mb-2'>Settings</summary>
         <div className='pb-4 flex flex-row flex-wrap gap-x-12 gap-y-4'>
@@ -104,7 +119,7 @@ export default function Playground(props: PlaygroundProps) {
           <div className="block">
             <p className="text-gray-700 mb-2">Charsets</p>
             <div className="inline-flex flex-col space-y-2">
-              {charsetNames.map((name) => (
+              {Object.values(CharSets).map((name) => (
                 <CheckBox
                   key={name}
                   label={`${name}${name === 'latin' ? ' (default)' : ''}`}
@@ -121,11 +136,10 @@ export default function Playground(props: PlaygroundProps) {
       </details>
 
       <Button
-        id="btnSubmit"
-        label={fetching ? 'Fetching...' : 'Start'}
-        onClick={() => setFetching(!fetching)}
-        disabled={fetching}
         className='mt-3 w-full md:w-auto'
+        label={loading ? 'Obfuscating...' : 'Obfuscate'}
+        onClick={() => setLoading(!loading)}
+        disabled={loading}
       />
 
       {/* Render result */}
