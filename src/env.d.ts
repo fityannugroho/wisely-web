@@ -1,2 +1,9 @@
 /// <reference path="../.astro/types.d.ts" />
 /// <reference types="astro/client" />
+
+interface ImportMetaEnv {
+  /**
+   * The maximum age of the cache for the Wisely API in seconds.
+   */
+  readonly WISELY_CACHE_MAX_AGE?: number;
+}

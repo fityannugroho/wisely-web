@@ -6,20 +6,45 @@ export const prerender = false;
 type CharSetNames = typeof CharSets[keyof typeof CharSets];
 
 async function fetchBuiltInCharSet(charSet: CharSetNames): Promise<CharSet> {
-  const response = await fetch(`https://cdn.jsdelivr.net/npm/wisely/charsets/${charSet}.json`);
-  const json = await response.json();
-  return json as CharSet;
+  const response = await fetch(
+    `https://cdn.jsdelivr.net/npm/wisely/charsets/${charSet}.json`
+  );
+  return await response.json() as CharSet;
 }
+
+/**
+ * A cache of built-in charsets.
+ */
+const charSetCache = new Map<CharSetNames, {
+  charSet: CharSet,
+  lastFetch: number,
+}>();
 
 function isValidCharSetName(name: string): name is CharSetNames {
   return typeof name === 'string'
     && Object.values(CharSets).includes(name as CharSetNames);
 }
 
+class BadRequestResponse extends Response {
+  constructor(message: string, headers?: HeadersInit) {
+    super(JSON.stringify({
+      status: 400,
+      error: 'Bad Request',
+      message,
+    }), {
+      status: 400,
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        ...headers,
+      },
+    });
+  }
+}
+
 export const GET: APIRoute = async ({ request }) => {
   const { searchParams } = new URL(request.url);
   const text = searchParams.get('t');
-  const charSetNames = searchParams.getAll('charset');
+  const charSetNames = searchParams.getAll('charset') as CharSetNames[];
   const caseSensitive = searchParams.has('sensitive');
   const phrases = Array.from(new Set(
     searchParams.get('p')?.split(',')
@@ -27,26 +52,12 @@ export const GET: APIRoute = async ({ request }) => {
   ));
 
   if (!text?.length) {
-    return new Response(JSON.stringify({
-      status: 400,
-      error: 'Bad Request',
-      message: 'No text provided',
-    }), {
-      status: 400,
-      headers: {'Content-Type': 'application/json; charset=utf-8'},
-    });
+    return new BadRequestResponse('No text provided');
   }
 
   // Validate the charSetNames
   if (charSetNames.some((name) => !isValidCharSetName(name))) {
-    return new Response(JSON.stringify({
-      status: 400,
-      error: 'Bad Request',
-      message: 'Invalid charset name provided',
-    }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json; charset=utf-8' },
-    });
+    return new BadRequestResponse('Invalid charset');
   }
 
   if (!charSetNames.length) {
@@ -54,7 +65,19 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   const charSets = await Promise.all(
-    charSetNames.map((name) => fetchBuiltInCharSet(name as CharSetNames)),
+    charSetNames.map((name) => {
+      const cached = charSetCache.get(name);
+      const maxAge = import.meta.env.WISELY_CACHE_MAX_AGE || 60 * 60 * 24;
+
+      if (cached && Date.now() - cached.lastFetch < maxAge * 1000) {
+        return cached.charSet;
+      }
+
+      return fetchBuiltInCharSet(name).then((charSet) => {
+        charSetCache.set(name, { charSet, lastFetch: Date.now()});
+        return charSet;
+      });
+    }),
   );
 
   return new Response(JSON.stringify({
