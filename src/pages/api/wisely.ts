@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
-import wisely, { CharSets, isPhraseValid, type CharSet, isCharSetValid } from 'wisely/core';
+import { z } from 'astro/zod';
+import wisely, { CharSets, isCharSetValid, isPhraseValid, type CharSet } from 'wisely/core';
 
 export const prerender = false;
 
@@ -20,13 +21,8 @@ const charSetCache = new Map<CharSetNames, {
   lastFetch: number,
 }>();
 
-function isValidCharSetName(name: string): name is CharSetNames {
-  return typeof name === 'string'
-    && Object.values(CharSets).includes(name as CharSetNames);
-}
-
 class BadRequestResponse extends Response {
-  constructor(message: string, headers?: HeadersInit) {
+  constructor(message: string | object, headers?: HeadersInit) {
     super(JSON.stringify({
       status: 400,
       error: 'Bad Request',
@@ -41,43 +37,65 @@ class BadRequestResponse extends Response {
   }
 }
 
-export const GET: APIRoute = async ({ request }) => {
-  const { searchParams } = new URL(request.url);
-  const text = searchParams.get('t');
-  const charSetNames = searchParams.getAll('charset') as CharSetNames[];
-  const caseSensitive = searchParams.has('sensitive');
-  const phrases = Array.from(new Set(
-    searchParams.get('p')?.split(',')
-      .filter(isPhraseValid).map((phrase) => phrase.trim())
-  ));
-  const strCustomCharSet = searchParams.get('custom');
-
-  if (!text?.length) {
-    return new BadRequestResponse('No text provided');
+class InternalServerErrorResponse extends Response {
+  constructor(message: string | object, headers?: HeadersInit) {
+    super(JSON.stringify({
+      status: 500,
+      error: 'Internal Server Error',
+      message,
+    }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        ...headers,
+      },
+    });
   }
+}
 
-  // Validate the charSetNames
-  if (charSetNames.some((name) => !isValidCharSetName(name))) {
-    return new BadRequestResponse('Invalid charset');
-  }
-
-  // Validate the custom charSet
-  let customCharSet: CharSet | undefined;
+function isValidJSON(val: string) {
   try {
-    if (strCustomCharSet) {
-      customCharSet = JSON.parse(strCustomCharSet) as CharSet;
-
-      if (!isCharSetValid(customCharSet)) {
-        throw new Error();
-      }
-    }
+    JSON.parse(val);
+    return true;
   } catch (error) {
-    return new BadRequestResponse('Invalid custom charset');
+    return false;
+  }
+}
+
+const payloadSchema = z.object({
+  text: z.string().trim().min(1),
+  caseSensitive: z.boolean().optional(),
+  charSets: z.array(z.nativeEnum(CharSets)).optional(),
+  customCharSet: z.string().trim()
+    .refine(isValidJSON, 'Invalid JSON format')
+    .transform((val) => JSON.parse(val) as CharSet)
+    .refine(isCharSetValid, 'Invalid charset provided')
+    .optional(),
+  phrases: z.array(z.string().trim()
+    .refine(isPhraseValid, 'Invalid phrase provided'))
+    .optional(),
+});
+
+type Payload = z.infer<typeof payloadSchema>;
+
+export const POST: APIRoute = async ({ request }) => {
+  // Get the payload
+  const payload = await request.json();
+
+  // Validate the payload
+  let validated: Payload;
+  try {
+    validated = await payloadSchema.parseAsync(payload);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return new BadRequestResponse(error.flatten().fieldErrors);
+    }
+    return new InternalServerErrorResponse(
+      error instanceof Error ? error.message : 'Error validating payload',
+    );
   }
 
-  if (!charSetNames.length && !customCharSet) {
-    charSetNames.push('latin');
-  }
+  const { text, phrases, charSets: charSetNames = [], caseSensitive} = validated;
 
   const charSets = await Promise.all(
     charSetNames.map((name) => {
@@ -89,15 +107,11 @@ export const GET: APIRoute = async ({ request }) => {
       }
 
       return fetchBuiltInCharSet(name).then((charSet) => {
-        charSetCache.set(name, { charSet, lastFetch: Date.now()});
+        charSetCache.set(name, { charSet, lastFetch: Date.now() });
         return charSet;
       });
     }),
   );
-
-  if (customCharSet) {
-    charSets.push(customCharSet);
-  }
 
   return new Response(JSON.stringify({
     status: 200,
@@ -105,6 +119,6 @@ export const GET: APIRoute = async ({ request }) => {
     text: wisely({ text, phrases, charSets, caseSensitive }),
   }), {
     status: 200,
-    headers: {'Content-Type': 'application/json; charset=utf-8'},
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
   });
 }

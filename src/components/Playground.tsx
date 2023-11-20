@@ -1,12 +1,12 @@
-import { useEffect, useReducer, useState } from 'react';
-import { CharSets, isCharSetValid } from 'wisely/core';
+import { useEffect, useMemo, useReducer, useState } from 'react';
+import { CharSets, isCharSetValid, type CharSet } from 'wisely/core';
 import Button from './Button';
 import CheckBox from './CheckBox';
 import Input from './Input';
 import MarkdownViewer from './MarkdownViewer';
 import TextArea from './TextArea';
 
-function charsetsReducer(
+function charSetsReducer(
   charsets: readonly string[],
   action: { type: 'add' | 'remove', charset: string },
 ) {
@@ -24,48 +24,61 @@ export type PlaygroundProps = {
   className?: string;
 }
 
+type Payload = {
+  text?: string;
+  caseSensitive?: boolean | undefined;
+  customCharSet?: string | undefined;
+  phrases?: string[] | undefined;
+}
+
 export default function Playground(props: PlaygroundProps) {
-  const [input, setInput] = useState<string>('');
-  const [charsets, dispatchCharsets] = useReducer(charsetsReducer, ['latin']);
-  const [customCharset, setCustomCharset] = useState<string>('');
-  const [caseSensitive, setCaseSensitive] = useState<boolean>(false);
+  const [data, setData] = useState<Payload>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof Payload, string[]>>>({});
+  const [charSets, dispatchCharSets] = useReducer(charSetsReducer, ['latin']);
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState('');
-  const [error, setError] = useState<string | undefined>(undefined);
   const [mdMode, setMdMode] = useState<boolean>(false);
-  const [phrases, setPhrases] = useState<string[]>([]);
+
+  const changeErrors = <K extends keyof Payload>(
+    key: K,
+    value: string[] | ((oldValue: string[]) => string[]),
+  ) => {
+    setErrors((prev) => ({
+      ...prev,
+      [key]: typeof value === 'function' ? value(prev[key] ?? []) : value,
+    }));
+  }
+
+  const changeData = <K extends keyof Payload>(
+    key: K,
+    value: Payload[K] | ((oldValue: Payload[K]) => Payload[K]),
+  ) => {
+    changeErrors(key, []);
+    setData((prev) => ({
+      ...prev,
+      [key]: typeof value === 'function' ? value(prev[key]) : value,
+    }));
+  }
 
   useEffect(() => {
     if (loading) {
-      setError(undefined);
+      setErrors({});
 
-      const url = new URL('/api/wisely', window.location.origin);
-
-      url.searchParams.set('t', input);
-      url.searchParams.set('p', phrases.join(','));
-
-      charsets.forEach(charset => {
-        if (charset === 'custom') {
-          // remove all whitespaces
-          const custom = customCharset.replace(/\s/g, '');
-          if (custom) {
-            url.searchParams.append('custom', custom);
-          }
-          return;
-        }
-        url.searchParams.append('charset', charset);
-      });
-
-      if (caseSensitive) {
-        url.searchParams.set('sensitive', '');
-      }
-
-      fetch(url, { mode: 'cors' })
-        .then(res => res.json())
-        .then(data => {
-          data.error ? setError(data.message) : setResult(data.text);
+      fetch('/api/wisely', {
+        method: 'post',
+        body: JSON.stringify({
+          ...data,
+          charSets: charSets.filter((charset) => charset !== 'custom'),
+        }),
+        mode: 'cors',
+      })
+        .then((res) => res.json())
+        .then((resJson) => {
+          resJson?.status < 400
+            ? setResult(resJson.text)
+            : setErrors(resJson?.message);
         })
-        .catch(err => {
+        .catch((err) => {
           console.error(err);
         })
         .finally(() => {
@@ -74,11 +87,17 @@ export default function Playground(props: PlaygroundProps) {
     }
   }, [loading]);
 
+  const hasErrors = useMemo(() => (
+    Object.values(errors)
+      .reduce((prev, curr) => [...prev, ...curr], [])
+      .length > 0
+  ), [errors]);
+
   useEffect(() => {
-    if (charsets.length === 0) {
-      dispatchCharsets({ type: 'add', charset: 'latin' });
+    if (!charSets.length) {
+      dispatchCharSets({ type: 'add', charset: 'latin' });
     }
-  }, [charsets]);
+  }, [charSets]);
 
   return (
     <div className={props.className}>
@@ -87,9 +106,8 @@ export default function Playground(props: PlaygroundProps) {
         fullWidth
         label='Enter the text'
         placeholder='You can put plain text or Markdown syntax here'
-        onChange={(val) => setInput(val)}
-        value={input}
-        error={error}
+        onChange={(text) => changeData('text', text)}
+        error={errors.text?.at(0)}
         rows={4}
         helpText={
           <p>
@@ -109,11 +127,11 @@ export default function Playground(props: PlaygroundProps) {
         label='Phrases (optional)'
         helpText='Enter specific phrases to obsfucate, separated by comma.'
         placeholder='e.g. lorem, ipsum, dolor sit, amet'
-        onChange={(val) => setPhrases(
-          Array.from(new Set(
-            val.split(',').map(phrase => phrase.trim())
-          ))
-        )}
+        error={errors.phrases?.at(0)}
+        onChange={(val) => changeData('phrases', Array.from(new Set(
+          val.split(',').map((phrase) => phrase.trim())
+            .filter((phrase) => phrase.length > 0)
+        )))}
       />
 
       <details>
@@ -123,40 +141,31 @@ export default function Playground(props: PlaygroundProps) {
             <p className="text-gray-700 mb-2">Case</p>
             <CheckBox
               label='case-sensitive'
-              onChange={(checked) => setCaseSensitive(checked)}
+              onChange={(checked) => changeData('caseSensitive', checked)}
             />
           </div>
 
           <div className="block">
             <p className="text-gray-700 mb-2">Charsets</p>
             <div className="inline-flex flex-col space-y-2">
-              {Object.values(CharSets).map((name) => (
+              {[...Object.values(CharSets), 'custom'].map((name) => (
                 <CheckBox
                   key={name}
                   label={`${name}${name === 'latin' ? ' (default)' : ''}`}
-                  onChange={(checked) => {
-                    dispatchCharsets({ type: checked ? 'add' : 'remove', charset: name });
-                  }}
-                  checked={charsets.includes(name)}
-                  disabled={name === 'latin' && charsets.length === 1 && charsets[0] === 'latin'}
+                  onChange={(checked) => dispatchCharSets({
+                    type: checked ? 'add' : 'remove',
+                    charset: name,
+                  })}
+                  checked={charSets.includes(name)}
+                  disabled={name === 'latin' && charSets.length === 1 && charSets[0] === 'latin'}
                 />
               ))}
-              <CheckBox
-                label='custom'
-                onChange={(checked) => {
-                  dispatchCharsets({ type: checked ? 'add' : 'remove', charset: 'custom' });
-                  // reset custom charset
-                  if (!checked) {
-                    setCustomCharset('');
-                  }
-                }}
-              />
             </div>
           </div>
         </div>
 
         {/* Custom charset */}
-        {charsets.includes('custom') && (
+        {charSets.includes('custom') && (
           <TextArea
             className='mt-2 mb-4'
             fullWidth
@@ -173,24 +182,22 @@ export default function Playground(props: PlaygroundProps) {
               </p>
             }
             placeholder='e.g. { "a": ["4","@"], "e": ["3"], "i": ["1"] }'
-            onChange={(val) => setCustomCharset(val)}
-            value={customCharset}
-            rows={4}
-            error={(() => {
-              if (customCharset) {
+            onChange={(customCharSet) => {
+              if (customCharSet) {
                 try {
-                  if (!isCharSetValid(JSON.parse(customCharset))) {
-                    return 'Invalid charset provided';
+                  if (!isCharSetValid(JSON.parse(customCharSet))) {
+                    changeErrors('customCharSet', ['Invalid charset value']);
+                    return;
                   }
                 } catch (err) {
-                  return 'Invalid JSON format';
+                  changeErrors('customCharSet', ['Invalid JSON format']);
+                  return;
                 }
               }
-              if (charsets.length === 1 && charsets[0] === 'custom' && !customCharset) {
-                return 'Custom charset must be provided';
-              }
-              return undefined;
-            })()}
+              changeData('customCharSet', customCharSet);
+            }}
+            rows={4}
+            error={errors.customCharSet?.at(0)}
           />
         )}
       </details>
@@ -199,7 +206,7 @@ export default function Playground(props: PlaygroundProps) {
         className='mt-3 w-full md:w-auto'
         label={loading ? 'Obfuscating...' : 'Obfuscate'}
         onClick={() => setLoading(!loading)}
-        disabled={loading}
+        disabled={loading || hasErrors}
       />
 
       {/* Render result */}
