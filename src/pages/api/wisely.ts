@@ -8,7 +8,7 @@ type CharSetNames = typeof CharSets[keyof typeof CharSets];
 
 async function fetchBuiltInCharSet(charSet: CharSetNames): Promise<CharSet> {
   const response = await fetch(
-    `https://cdn.jsdelivr.net/npm/wisely/charsets/${charSet}.json`
+    `https://cdn.jsdelivr.net/npm/wisely@0.4.1/charsets/${charSet}.json`
   );
   return await response.json() as CharSet;
 }
@@ -99,11 +99,13 @@ export const POST: APIRoute = async ({ request }) => {
 
   const charSets = await Promise.all(
     charSetNames.map((name) => {
-      const cached = charSetCache.get(name);
-      const maxAge = import.meta.env.WISELY_CACHE_MAX_AGE || 60 * 60 * 24;
+      if (!import.meta.env.WISELY_DISABLE_CACHE) {
+        const cached = charSetCache.get(name);
+        const maxAge = import.meta.env.WISELY_CACHE_MAX_AGE || 60 * 60 * 24;
 
-      if (cached && Date.now() - cached.lastFetch < maxAge * 1000) {
-        return cached.charSet;
+        if (cached && Date.now() - cached.lastFetch < maxAge * 1000) {
+          return cached.charSet;
+        }
       }
 
       return fetchBuiltInCharSet(name).then((charSet) => {
