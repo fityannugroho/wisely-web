@@ -95,7 +95,7 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  const { text, phrases, charSets: charSetNames = [], caseSensitive} = validated;
+  const { text, phrases, charSets: charSetNames = [], caseSensitive, customCharSet} = validated;
 
   const charSets = await Promise.all(
     charSetNames.map((name) => {
@@ -116,7 +116,12 @@ export const POST: APIRoute = async ({ request }) => {
   return new Response(JSON.stringify({
     status: 200,
     message: 'OK',
-    text: wisely({ text, phrases, charSets, caseSensitive }),
+    text: wisely({
+      text,
+      phrases,
+      charSets: [...charSets, customCharSet ?? {}],
+      caseSensitive,
+    }),
   }), {
     status: 200,
     headers: { 'Content-Type': 'application/json; charset=utf-8' },
