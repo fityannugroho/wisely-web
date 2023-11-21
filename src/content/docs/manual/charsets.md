@@ -53,4 +53,4 @@ Below is the built-in charsets available. You can use the name of the charset as
 | `latin-ext-a` | [Latin Extended-A](https://unicodeplus.com/block/0100) | \u0100 - \u017f |
 | `latin-ext-b` | [Latin Extended-B](https://unicodeplus.com/block/0180) | \u0180 - \u024f |
 
-> See the details of each charsets in the [repository](https://github.com/fityannugroho/wisely/tree/main/charsets).
+> See the details of each charsets in the [package repository](https://github.com/fityannugroho/wisely/tree/main/charsets).
