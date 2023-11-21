@@ -16,14 +16,14 @@ npm install wisely
 
 ## Importing
 
-**Wisely** is published as ECMAScript modules (ESM).
-
 ```js
 import wisely from 'wisely';
 ```
 
-For CommonJS users, you can import it using [dynamic imports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import) like this:
+**Wisely** is a native [**ESM**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) package and does not provide CommonJS build.
+
+So, for CommonJS users, you can import it using [dynamic imports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import) like this:
 
 ```js
-const wisely = await require('wisely');
+const wisely = await import('wisely');
 ```

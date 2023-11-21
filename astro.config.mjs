@@ -9,6 +9,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Wisely',
+      description: 'Obfuscating text or phrases with random uncommon characters',
       defaultLocale: 'root',
       locales: {
         root: {
@@ -36,9 +37,15 @@ export default defineConfig({
           autogenerate: {directory: 'manual'},
         }
       ],
+      editLink: {
+        baseUrl: 'https://github.com/fityannugroho/wisely-web/edit/main/',
+      },
+      lastUpdated: true,
     }),
     react(),
-    tailwind(),
+    tailwind({
+			applyBaseStyles: false,
+    }),
   ],
   output: 'hybrid',
   adapter: vercel(),

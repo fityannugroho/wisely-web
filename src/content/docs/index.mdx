@@ -4,12 +4,14 @@ head:
   # Use a custom <title> tag
   - tag: title
     content: Wisely
-description: Obfuscating text or phrases with random uncommon characters to avoid banning
+description: Obfuscating text or phrases with random uncommon characters.
 template: splash
+editUrl: false
+lastUpdated: false
 hero:
-  tagline: Obfuscating text or phrases with random uncommon characters to avoid banning
+  tagline: Obfuscating text or phrases with random uncommon characters.
   image:
-    file: ../../assets/houston.webp
+    file: ../../assets/ui.gif
   actions:
     - text: Try	it now
       link: /playground
@@ -22,19 +24,18 @@ hero:
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Next steps
-
 <CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
+	<Card title="Try it" icon="rocket">
+    Try **Wisely** in the [playground](/playground).
 	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
+  <Card title="Getting started" icon="open-book">
+    Learn how to use **Wisely** in the [documentation](/guides/getting-started).
+  </Card>
+	<Card title="Improving the docs" icon="pencil">
+    Help us improve the documentation by click on `Edit page` at the bottom of each page.
 	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
-	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
+	<Card title="Support this project" icon="star">
+    If you like Wisely, give it a ⭐ on [GitHub](https://github.com/fityannugroho/wisely-web) and spread the word!
+    Also, please consider [sponsoring](https://github.com/sponsors/fityannugroho) the project.
 	</Card>
 </CardGrid>

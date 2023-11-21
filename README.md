@@ -1,19 +1,18 @@
-# Starlight Starter Kit: Basics
+# Wisely Web
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+The [**Wisely**](https://github.com/fityannugroho/wisely) documentation and playground.
 
-```
-npm create astro@latest -- --template starlight
-```
+[<img src="/src/assets/ui.gif" alt="Wisely Web" width="335" height="314" />](https://wisely.vercel.app/playground)
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/starlight/tree/main/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/starlight/tree/main/examples/basics)
+## Documentation
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+You can find the online version of the Wisely documentation at https://wisely.vercel.app.
 
-## 🚀 Project Structure
+## Playground
 
-Inside of your Astro + Starlight project, you'll see the following folders and files:
+You can find the Wisely playground at https://wisely.vercel.app/playground.
+
+## Project Structure
 
 ```
 .
@@ -22,32 +21,25 @@ Inside of your Astro + Starlight project, you'll see the following folders and f
 │   ├── assets/
 │   ├── content/
 │   │   ├── docs/
+│   │   ├── i18n/
 │   │   └── config.ts
+│   ├── components/
+│   ├── layouts/
+│   ├── pages/
+│   ├── styles/
 │   └── env.d.ts
 ├── astro.config.mjs
 ├── package.json
 └── tsconfig.json
 ```
-
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+The documentation are written in `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
 
 Images can be added to `src/assets/` and embedded in Markdown with a relative link.
 
 Static assets, like favicons, can be placed in the `public/` directory.
 
-## 🧞 Commands
+## Support This Project
 
-All commands are run from the root of the project, from a terminal:
+Give a ⭐️ if this project helped you!
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+Also please consider supporting this project by **becoming a sponsor**. Your donation will help us to maintain and develop this project and provide you with better support.
