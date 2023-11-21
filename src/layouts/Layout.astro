@@ -1,4 +1,5 @@
 ---
+import Head from '../components/Head.astro';
 import '../styles/tailwind.css';
 
 export type Props = {
@@ -10,25 +11,11 @@ const { title, description } = Astro.props;
 const ogImageUrl = new URL('/og.jpg', Astro.url);
 ---
 <html lang="en">
-  <head>
-    <title>{title}</title>
-    <meta charset="utf-8" />
-    <meta name="description" content={description} />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="keywords" content="wisely, npm, package, github, tools, obfuscator, obfuscate, text, phrase, random, uncommon, character, web, playground" />
-    <meta name="generator" content={Astro.generator} />
-
-    <meta name="og:title" content={title} />
-    <meta name="og:description" content={description} />
-    <meta name="og:url" content={Astro.url} />
-    <meta name="og:site_name" content="Wisely" />
-    <meta name="og:image" content={ogImageUrl} />
-
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImageUrl} />
-  </head>
+  <Head
+    title={title}
+    description={description}
+    ogImage={ogImageUrl}
+  />
   <body>
     <main class="p-4">
       <slot />
