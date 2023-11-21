@@ -67,13 +67,6 @@ export default defineConfig({
         {
           tag: 'meta',
           attrs: {
-            property: 'twitter:card',
-            content: 'summary_large_image',
-          },
-        },
-        {
-          tag: 'meta',
-          attrs: {
             property: 'twitter:image',
             content: site + 'og.jpg',
           },
