@@ -29,8 +29,10 @@ export default function TextArea({
   ...props
 }: TextAreaProps) {
   const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    props.onChange?.(event.target.value);
+    props.onChange(event.target.value);
   };
+
+  const helpTextEl = typeof helpText === 'string' ? <p>{helpText}</p> : helpText;
 
   return (
     <div className={`block ${props.className ?? ''}`}>
@@ -52,10 +54,8 @@ export default function TextArea({
       />
 
       <div className={`text-sm mt-1 ml-1 ${error ? 'text-red-500' : 'text-gray-500'}`}>
-        {error ? <p>{error}</p> : (
-          typeof helpText === 'string' ? <p>{helpText}</p> : helpText
-        )}
+        {error ? <p>{error}</p> : helpTextEl }
       </div>
     </div>
   );
-};
+}

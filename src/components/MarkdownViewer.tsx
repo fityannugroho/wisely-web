@@ -9,7 +9,7 @@ export type MarkdownViewerProps = {
   raw?: boolean,
 };
 
-export default function MarkdownViewer({text, raw}: MarkdownViewerProps) {
+export default function MarkdownViewer({ text, raw }: MarkdownViewerProps) {
   return (raw ? (
     <pre className='whitespace-pre-wrap break-words'>{text}</pre>
   ) : (

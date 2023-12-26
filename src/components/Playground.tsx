@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useReducer, useState } from 'react';
-import { CharSets, isCharSetValid, type CharSet } from 'wisely/core';
-import Button from './Button';
-import CheckBox from './CheckBox';
-import Input from './Input';
-import MarkdownViewer from './MarkdownViewer';
-import TextArea from './TextArea';
+import {
+  useEffect, useMemo, useReducer, useState,
+} from 'react';
+import { CharSets, isCharSetValid } from 'wisely/core';
+import Button from './Button.tsx';
+import CheckBox from './CheckBox.tsx';
+import Input from './Input.tsx';
+import MarkdownViewer from './MarkdownViewer.tsx';
+import TextArea from './TextArea.tsx';
 
 function charSetsReducer(
   charsets: readonly string[],
@@ -14,7 +16,7 @@ function charSetsReducer(
     case 'add':
       return charsets.includes(action.charset) ? charsets : [...charsets, action.charset];
     case 'remove':
-      return charsets.filter(charset => charset !== action.charset);
+      return charsets.filter((charset) => charset !== action.charset);
     default:
       throw new Error();
   }
@@ -22,14 +24,14 @@ function charSetsReducer(
 
 export type PlaygroundProps = {
   className?: string;
-}
+};
 
 type Payload = {
   text?: string;
   caseSensitive?: boolean | undefined;
   customCharSet?: string | undefined;
   phrases?: string[] | undefined;
-}
+};
 
 export default function Playground(props: PlaygroundProps) {
   const [data, setData] = useState<Payload>({});
@@ -47,7 +49,7 @@ export default function Playground(props: PlaygroundProps) {
       ...prev,
       [key]: typeof value === 'function' ? value(prev[key] ?? []) : value,
     }));
-  }
+  };
 
   const changeData = <K extends keyof Payload>(
     key: K,
@@ -58,7 +60,7 @@ export default function Playground(props: PlaygroundProps) {
       ...prev,
       [key]: typeof value === 'function' ? value(prev[key]) : value,
     }));
-  }
+  };
 
   useEffect(() => {
     if (loading) {
@@ -73,12 +75,15 @@ export default function Playground(props: PlaygroundProps) {
         mode: 'cors',
       })
         .then((res) => res.json())
-        .then((resJson) => {
-          resJson?.status < 400
-            ? setResult(resJson.text)
-            : setErrors(resJson?.message);
+        .then((resJson: { status: number, text: string, message: object }) => {
+          if (resJson.status < 400) {
+            setResult(resJson.text);
+          } else {
+            setErrors(resJson.message);
+          }
         })
         .catch((err) => {
+          // eslint-disable-next-line no-console
           console.error(err);
         })
         .finally(() => {
@@ -106,7 +111,7 @@ export default function Playground(props: PlaygroundProps) {
         fullWidth
         label='Enter the text'
         placeholder='You can put plain text or Markdown syntax here'
-        onChange={(text) => changeData('text', text)}
+        onChange={(text) => { changeData('text', text); }}
         error={errors.text?.at(0)}
         rows={4}
         helpText={
@@ -128,10 +133,12 @@ export default function Playground(props: PlaygroundProps) {
         helpText='Enter specific phrases to obsfucate, separated by comma.'
         placeholder='e.g. lorem, ipsum, dolor sit, amet'
         error={errors.phrases?.at(0)}
-        onChange={(val) => changeData('phrases', Array.from(new Set(
-          val.split(',').map((phrase) => phrase.trim())
-            .filter((phrase) => phrase.length > 0)
-        )))}
+        onChange={(val) => {
+          changeData('phrases', Array.from(new Set(
+            val.split(',').map((phrase) => phrase.trim())
+              .filter((phrase) => phrase.length > 0),
+          )));
+        }}
       />
 
       <details>
@@ -141,7 +148,7 @@ export default function Playground(props: PlaygroundProps) {
             <p className="text-gray-700 mb-2">Case</p>
             <CheckBox
               label='case-sensitive'
-              onChange={(checked) => changeData('caseSensitive', checked)}
+              onChange={(checked) => { changeData('caseSensitive', checked); }}
             />
           </div>
 
@@ -152,10 +159,12 @@ export default function Playground(props: PlaygroundProps) {
                 <CheckBox
                   key={name}
                   label={`${name}${name === 'latin' ? ' (default)' : ''}`}
-                  onChange={(checked) => dispatchCharSets({
-                    type: checked ? 'add' : 'remove',
-                    charset: name,
-                  })}
+                  onChange={(checked) => {
+                    dispatchCharSets({
+                      type: checked ? 'add' : 'remove',
+                      charset: name,
+                    });
+                  }}
                   checked={charSets.includes(name)}
                   disabled={name === 'latin' && charSets.length === 1 && charSets[0] === 'latin'}
                 />
@@ -185,7 +194,7 @@ export default function Playground(props: PlaygroundProps) {
             onChange={(customCharSet) => {
               if (customCharSet) {
                 try {
-                  if (!isCharSetValid(JSON.parse(customCharSet))) {
+                  if (!isCharSetValid(JSON.parse(customCharSet) as object)) {
                     changeErrors('customCharSet', ['Invalid charset value']);
                     return;
                   }
@@ -205,7 +214,7 @@ export default function Playground(props: PlaygroundProps) {
       <Button
         className='mt-3 w-full md:w-auto'
         label={loading ? 'Obfuscating...' : 'Obfuscate'}
-        onClick={() => setLoading(!loading)}
+        onClick={() => { setLoading(!loading); }}
         disabled={loading || hasErrors}
       />
 
@@ -216,7 +225,7 @@ export default function Playground(props: PlaygroundProps) {
           <div className="flex justify-end mb-2">
             <CheckBox
               label='Render as Markdown'
-              onChange={(checked) => setMdMode(checked)}
+              onChange={(checked) => { setMdMode(checked); }}
             />
           </div>
           <div className="block border border-gray-300 rounded-md p-4">
@@ -225,5 +234,5 @@ export default function Playground(props: PlaygroundProps) {
         </div>
       )}
     </div>
-  )
+  );
 }

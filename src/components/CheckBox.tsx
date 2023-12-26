@@ -1,8 +1,8 @@
 import type { InputHTMLAttributes } from 'react';
 
 export type CheckBoxProps = Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  'onChange' | 'type' | 'value'
+InputHTMLAttributes<HTMLInputElement>,
+'onChange' | 'type' | 'value'
 > & {
   label: string;
   onChange?: (checked: boolean) => void;
@@ -34,7 +34,7 @@ export default function CheckBox({
           ${props.disabled ? 'cursor-not-allowed text-gray-500' : 'cursor-pointer'}
         `}
         type="checkbox"
-        onChange={(e) => handleChange(e.target.checked)}
+        onChange={(e) => { handleChange(e.target.checked); }}
       />
       <span className='ml-2'>
         {label}

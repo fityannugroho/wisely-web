@@ -1,8 +1,8 @@
 import type { InputHTMLAttributes } from 'react';
 
 export type InputProps = Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  'onChange'
+InputHTMLAttributes<HTMLInputElement>,
+'onChange'
 > & {
   label: string;
   error?: string;
@@ -18,6 +18,8 @@ export default function Input({
   helpText,
   ...props
 }: InputProps) {
+  const helpTextEl = typeof helpText === 'string' ? <p>{helpText}</p> : helpText;
+
   return (
     <label className={`block text-gray-700 ${props.className ?? ''}`}>
       {label}
@@ -36,9 +38,7 @@ export default function Input({
       />
 
       <div className={`text-sm mt-1 ml-1 ${error ? 'text-red-500' : 'text-gray-500'}`}>
-        {error ? <p>{error}</p> : (
-          typeof helpText === 'string' ? <p>{helpText}</p> : helpText
-        )}
+        {error ? <p>{error}</p> : helpTextEl }
       </div>
     </label>
   );
