@@ -1,4 +1,5 @@
 ---
+// eslint-disable-next-line import/no-unresolved
 import { ViewTransitions } from 'astro:transitions';
 
 export type Props = {
@@ -25,7 +26,7 @@ const { title, description, ogImage } = Astro.props;
 <link
   rel="shortcut icon"
   type="image/svg+xml"
-  href={`${Astro.site}/favicon.svg`}
+  href={`${Astro.site?.toString()}/favicon.svg`}
 />
 <title>{title}</title>
 <meta name="title" content={title} />

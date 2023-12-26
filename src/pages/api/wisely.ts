@@ -1,6 +1,10 @@
 import type { APIRoute } from 'astro';
 import { z } from 'astro/zod';
-import wisely, { CharSets, isCharSetValid, isPhraseValid, type CharSet } from 'wisely/core';
+import wisely, {
+  CharSets, isCharSetValid, isPhraseValid, type CharSet,
+} from 'wisely/core';
+import BadRequestResponse from './responses/BadRequest.js';
+import InternalServerErrorResponse from './responses/InternalServerError.js';
 
 export const prerender = false;
 
@@ -8,7 +12,7 @@ type CharSetNames = typeof CharSets[keyof typeof CharSets];
 
 async function fetchBuiltInCharSet(charSet: CharSetNames): Promise<CharSet> {
   const response = await fetch(
-    `https://cdn.jsdelivr.net/npm/wisely@0.4.1/charsets/${charSet}.json`
+    `https://cdn.jsdelivr.net/npm/wisely@0.4.1/charsets/${charSet}.json`,
   );
   return await response.json() as CharSet;
 }
@@ -20,38 +24,6 @@ const charSetCache = new Map<CharSetNames, {
   charSet: CharSet,
   lastFetch: number,
 }>();
-
-class BadRequestResponse extends Response {
-  constructor(message: string | object, headers?: HeadersInit) {
-    super(JSON.stringify({
-      status: 400,
-      error: 'Bad Request',
-      message,
-    }), {
-      status: 400,
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        ...headers,
-      },
-    });
-  }
-}
-
-class InternalServerErrorResponse extends Response {
-  constructor(message: string | object, headers?: HeadersInit) {
-    super(JSON.stringify({
-      status: 500,
-      error: 'Internal Server Error',
-      message,
-    }), {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        ...headers,
-      },
-    });
-  }
-}
 
 function isValidJSON(val: string) {
   try {
@@ -80,7 +52,7 @@ type Payload = z.infer<typeof payloadSchema>;
 
 export const POST: APIRoute = async ({ request }) => {
   // Get the payload
-  const payload = await request.json();
+  const payload = await request.json() as Payload;
 
   // Validate the payload
   let validated: Payload;
@@ -95,7 +67,9 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  const { text, phrases, charSets: charSetNames = [], caseSensitive, customCharSet} = validated;
+  const {
+    text, phrases, charSets: charSetNames = [], caseSensitive, customCharSet,
+  } = validated;
 
   const charSets = await Promise.all(
     charSetNames.map((name) => {
@@ -128,4 +102,4 @@ export const POST: APIRoute = async ({ request }) => {
     status: 200,
     headers: { 'Content-Type': 'application/json; charset=utf-8' },
   });
-}
+};
