@@ -1,7 +1,7 @@
-import react from "@astrojs/react";
+import react from '@astrojs/react';
 import starlight from '@astrojs/starlight';
-import tailwind from "@astrojs/tailwind";
-import vercel from "@astrojs/vercel/serverless";
+import tailwind from '@astrojs/tailwind';
+import vercel from '@astrojs/vercel/serverless';
 import { defineConfig } from 'astro/config';
 
 // https://vercel.com/docs/projects/environment-variables/system-environment-variables#system-environment-variables
@@ -35,15 +35,15 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Guides',
-          autogenerate: {directory: 'guides'},
+          autogenerate: { directory: 'guides' },
           translations: {
             id: 'Panduan',
           },
         },
         {
           label: 'Manual',
-          autogenerate: {directory: 'manual'},
-        }
+          autogenerate: { directory: 'manual' },
+        },
       ],
       editLink: {
         baseUrl: 'https://github.com/fityannugroho/wisely-web/edit/main/',
@@ -54,6 +54,7 @@ export default defineConfig({
           tag: 'meta',
           attrs: {
             name: 'keywords',
+            // eslint-disable-next-line max-len
             content: 'wisely, npm, package, github, tools, obfuscator, obfuscate, text, phrase, random, uncommon, character, web, playground',
           },
         },
@@ -61,21 +62,21 @@ export default defineConfig({
           tag: 'meta',
           attrs: {
             property: 'og:image',
-            content: site + 'og.jpg',
+            content: `${site}og.jpg`,
           },
         },
         {
           tag: 'meta',
           attrs: {
             property: 'twitter:image',
-            content: site + 'og.jpg',
+            content: `${site}og.jpg`,
           },
         },
       ],
     }),
     react(),
     tailwind({
-			applyBaseStyles: false,
+      applyBaseStyles: false,
     }),
   ],
   output: 'hybrid',

@@ -30,6 +30,7 @@ module.exports = {
   ],
   rules: {
     '@typescript-eslint/no-unused-vars': 'warn',
+    'global-require': 'off',
     "import/extensions": [
         "error",
         "ignorePackages"
@@ -40,6 +41,7 @@ module.exports = {
         "devDependencies": true
       }
     ],
+    "import/no-unresolved": "off",
     "import/prefer-default-export": "off",
     "max-len": [
       "error",
@@ -63,8 +65,8 @@ module.exports = {
         extraFileExtensions: [".astro"],
       },
       rules: {
-        // override/add rules settings here, such as:
-        // "astro/no-set-html-directive": "error"
+        // override/add rules settings here
+        "astro/no-set-html-directive": "error"
       },
     },
   ],
